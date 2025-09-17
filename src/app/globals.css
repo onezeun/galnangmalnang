@@ -1,9 +1,23 @@
 @import 'tailwindcss';
 @import 'tailwindcss-animated';
 
+@font-face {
+    font-family: 'MitmiFont';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2402_1@1.0/Ownglyph_meetme-Rg.woff2') format('woff2');
+    font-weight: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Thin.woff') format('woff');
+    font-weight: 100;
+    font-display: swap;
+}
+
 :root {
-  --background: #f5feff;
-  --foreground: #1e3a4c;
+  --background: #ededed;
+  --foreground: #0a0a0a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -18,6 +32,9 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-pretendard: 'Pretendard';
+  --font-mitme: 'MitmiFont';
+
 
   --color-brand-50: #f5feff;
   --color-brand-100: #e6fafc;
