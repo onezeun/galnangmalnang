@@ -4,6 +4,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getPlaceByIdAction } from '@/actions/place-actions';
 import { LuShare2 } from 'react-icons/lu';
+import { useRouter } from 'next/navigation';
 
 type Props = { id: number };
 
@@ -14,6 +15,7 @@ const categoryLabel: Record<string, string> = {
 };
 
 export default function PlaceDetailCard({ id }: Props) {
+  const router = useRouter();
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['place', id],
     queryFn: async () => {
@@ -72,7 +74,7 @@ export default function PlaceDetailCard({ id }: Props) {
         </div>
 
         {/* 이미지 영역 */}
-        <div className="mx-3 mb-3 h-96 rounded-lg bg-neutral-200/80 object-cover">
+        <div className="mx-3 mb-3 h-1/2 rounded-lg bg-neutral-200/80 object-cover">
           {image_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={image_url} alt={name} className="h-full w-full rounded-lg object-cover" />
@@ -141,6 +143,14 @@ export default function PlaceDetailCard({ id }: Props) {
           </button>
         </div>
       </div>
+      <button
+        type="button"
+        onClick={() => router.push('/')}
+        className="mt-5 w-full rounded-xl border border-neutral-200 bg-white py-3 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
+
+      >
+        처음으로
+      </button>
     </div>
   );
 }
