@@ -1,5 +1,5 @@
-import PlaceList from "@/components/Place/List";
+import PlaceList from '@/components/Place/List';
 
 export default function PlaceListPage() {
-  return <PlaceList />
+  return <PlaceList />;
 }

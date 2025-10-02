@@ -43,7 +43,6 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
-
 /** /admin 아래만 미들웨어 적용 */
 export const config = {
   matcher: ['/admin/:path*'],

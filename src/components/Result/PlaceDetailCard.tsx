@@ -147,7 +147,6 @@ export default function PlaceDetailCard({ id }: Props) {
         type="button"
         onClick={() => router.push('/')}
         className="mt-5 w-full rounded-xl border border-neutral-200 bg-white py-3 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
-
       >
         처음으로
       </button>

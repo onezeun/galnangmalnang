@@ -28,7 +28,7 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-4">
-      <h1 className="mb-6 text-4xl font-mitme">로그인</h1>
+      <h1 className="font-mitme mb-6 text-4xl">로그인</h1>
       <form
         onSubmit={handleLogin}
         className="w-full space-y-4 rounded-md border border-neutral-200 bg-white p-6 shadow-sm"
@@ -50,7 +50,7 @@ export default function LoginPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="focus:ring-brand-500 border-neutral-300 border mt-1 w-full rounded-md px-3 py-2 text-sm outline-none focus:ring-2"
+            className="focus:ring-brand-500 mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
           />
         </div>
         {error && <p className="text-sm text-rose-600">{error}</p>}

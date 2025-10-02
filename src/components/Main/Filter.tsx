@@ -6,12 +6,12 @@ import { LuFilter, LuChevronDown } from 'react-icons/lu';
 
 const label = {
   region: {
-    'all': '전체',
-    'nearby': '현재위치근처',
-    'north': '제주시/북부',
-    'south': '서귀포/남부',
-    'east': '동부',
-    'west': '서부',
+    all: '전체',
+    nearby: '현재위치근처',
+    north: '제주시/북부',
+    south: '서귀포/남부',
+    east: '동부',
+    west: '서부',
   },
   category: { all: '전체', food: '음식점', cafe: '카페', sight: '관광지' },
 } as const;

@@ -66,7 +66,9 @@ export async function getPlaceByIdAction(id: number) {
 }
 
 // 리스트 조회
-export async function getPlaceListAction(params: ListPlacesParamsType): Promise<ListPlacesResultType> {
+export async function getPlaceListAction(
+  params: ListPlacesParamsType
+): Promise<ListPlacesResultType> {
   const { q = '', category = '', region = '', page = 0, pageSize = 10 } = params ?? {};
   const supabase = await createServerSupabaseClient();
 

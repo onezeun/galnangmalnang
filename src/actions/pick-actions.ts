@@ -58,7 +58,6 @@ export async function pickPlaceAction(formData: FormData) {
   redirect(`/result/${data[0].id}`);
 }
 
-
 const VALID = new Set(['food', 'cafe', 'sight']);
 
 export async function pickByCategoryAction(formData: FormData) {

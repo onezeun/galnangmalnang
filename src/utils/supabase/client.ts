@@ -9,10 +9,7 @@ let _client: SupabaseClient<Database> | null = null;
 
 export function getSupabase(): SupabaseClient<Database> {
   if (!_client) {
-    _client = createBrowserClient<Database>(
-      SUPABASE.URL!,
-      SUPABASE.ANON!
-    );
+    _client = createBrowserClient<Database>(SUPABASE.URL!, SUPABASE.ANON!);
   }
   return _client;
 }
