@@ -15,9 +15,6 @@ const eslintConfig = [
   ...compat.extends('prettier'), // eslint-config-prettier prettier와 중복된 eslint 규칙 제거
   {
     ignores: ['node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts'],
-    plugins: {
-      'unused-imports': unusedImports,
-    },
     rules: {
       '@typescript-eslint/triple-slash-reference': 'off',
       'react/react-in-jsx-scope': 'off',
@@ -29,12 +26,6 @@ const eslintConfig = [
         'warn',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
-      'unused-imports/no-unused-imports': 'warn',
-      'unused-imports/no-unused-vars': [
-        'warn',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
-      ],
-
       'no-unused-expressions': [
         'warn',
         { allowShortCircuit: true, allowTernary: true, allowTaggedTemplates: true },
