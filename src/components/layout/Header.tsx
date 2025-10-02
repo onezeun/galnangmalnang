@@ -1,27 +1,68 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { LuMenu, LuX } from 'react-icons/lu';
 import Logo from '@/components/common/Logo';
+import { getAuth, type AuthResult } from '@/actions/auth-actions';
+import { getSupabase } from '@/utils/supabase/client';
+import { useAuthStore } from '@/stores/authStore';
 
-type HeaderProps = { isAdmin?: boolean };
 type Item = { href: string; label: string; onClick?: () => void };
 
-const Header = ({ isAdmin = false }: HeaderProps) => {
+export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const { user, isLoggedIn, setAuth, reset } = useAuthStore();
+  const supabase = useRef(getSupabase()).current;
 
-  // isAdmin이 바뀔 때만 다시 계산
+  useEffect(() => {
+    (async () => {
+      try {
+        const { isLoggedIn, user } = await getAuth();
+        isLoggedIn ? setAuth(user) : reset();
+      } catch {
+        reset();
+      }
+    })();
+  }, [setAuth, reset]);
+
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (session?.user) {
+        setAuth({ id: session.user.id, email: session.user.email ?? null });
+      } else {
+        reset();
+      }
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [supabase, setAuth, reset]);
+
+  // 메뉴 아이템 (deps에 isLoggedIn만 두면 충분)
   const items: Item[] = useMemo(() => {
-    if (!isAdmin) return [{ href: '/login', label: '관리자 로그인' }];
+    if (!isLoggedIn) {
+      return [{ href: '/login', label: '관리자 로그인' }];
+    }
+
+    const logout: Item = {
+      href: '#logout',
+      label: '로그아웃',
+      onClick: async () => {
+        reset();
+        await supabase.auth.signOut();
+        if (pathname.startsWith('/admin')) router.push('/');
+      },
+    };
+
     return [
+      { href: '/', label: '홈' },
       { href: '/admin/place-new', label: '장소 신규 등록' },
       { href: '/admin/place-list', label: '등록된 리스트 확인' },
-      { href: '#logout', label: '로그아웃', onClick: () => console.log('logout') },
+      logout,
     ];
-  }, [isAdmin]);
+  }, [isLoggedIn, pathname, router, supabase, reset]);
 
   useEffect(() => {
     if (!open) return;
@@ -86,8 +127,8 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
               {item.onClick ? (
                 <button
                   className="block w-full text-left"
-                  onClick={() => {
-                    item.onClick?.();
+                  onClick={async () => {
+                    await item.onClick?.();
                     setOpen(false);
                   }}
                 >
@@ -104,6 +145,4 @@ const Header = ({ isAdmin = false }: HeaderProps) => {
       </nav>
     </>
   );
-};
-
-export default Header;
+}

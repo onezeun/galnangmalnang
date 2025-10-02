@@ -3,6 +3,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { Database } from '@/types_db';
+import { SUPABASE } from '@/config';
 
 /**
  * 서버 환경(Server Component, Server Action 등)에서 사용할 Supabase 클라이언트 생성 함수
@@ -15,8 +16,8 @@ export const createServerSupabaseClient = async (admin: boolean = false) => {
   const cookieStore = await cookies();
 
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    admin ? process.env.NEXT_SUPABASE_SERVICE_ROLE! : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    SUPABASE.URL!,
+    admin ? SUPABASE.SERVICE_ROLE! : SUPABASE.ANON!,
     {
       cookies: {
         get(name: string) {
