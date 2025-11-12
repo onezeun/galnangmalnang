@@ -2,16 +2,30 @@
 
 import { useSearchParams } from 'next/navigation';
 import { signInAction } from '@/actions/auth-actions';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 
 export default function LoginPage() {
-  const searchParams = useSearchParams();
-  const error = searchParams.get('error');
+  const router = useRouter();
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const formAction = async (formData: FormData) => {
+    const res = await signInAction(formData);
+    if (!res.ok) {
+      setErrorMsg(res.message);
+      return;
+    }
+    if (res.redirect) {
+      router.replace(res.redirect);
+      return;
+    }
+  };
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-4">
       <h1 className="font-mitme mb-6 text-4xl">로그인</h1>
       <form
-        action={signInAction}
+        action={formAction}
         className="w-full space-y-4 rounded-md border border-neutral-200 bg-white p-6 shadow-sm"
       >
         <div>
@@ -33,7 +47,7 @@ export default function LoginPage() {
           />
         </div>
 
-        {error && <p className="text-sm text-rose-600">{error}</p>}
+        {errorMsg && <p className="text-sm text-rose-600">{errorMsg}</p>}
 
         <button
           type="submit"

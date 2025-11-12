@@ -1,6 +1,5 @@
 'use server';
 
-import { redirect } from 'next/navigation';
 import { createServerSupabaseClient } from '@/utils/supabase/server';
 import { ActionResultType, ERR } from '@/types/action';
 
@@ -42,7 +41,7 @@ export async function signInAction(formData: FormData): Promise<ActionResultType
       };
     }
 
-  redirect(`/admin/place-list`);
+  return { ok: true, data: { isLoggedIn: true, user: { id: user.id, email: user.email } } };
   } catch (e: any) {
     return {
       ok: false,

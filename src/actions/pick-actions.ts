@@ -1,6 +1,5 @@
 'use server';
 
-import { redirect } from 'next/navigation';
 import { createServerSupabaseClient } from '@/utils/supabase/server';
 import { ActionResultType, ERR } from '@/types/action';
 
@@ -68,7 +67,7 @@ export async function pickPlaceAction(formData: FormData): Promise<ActionResultT
         };
       }
 
-      redirect(`/result/${nearbyData[0].id}`);
+      return { ok: true, data: { id: nearbyData?.[0]?.id } };
     }
 
     // 2) 그 외(전체/특정 지역): 기존 랜덤
@@ -100,7 +99,7 @@ export async function pickPlaceAction(formData: FormData): Promise<ActionResultT
         details: { region, category },
       };
     }
-    redirect(`/result/${randomData[0].id}`);
+    return { ok: true, data: { id: randomData?.[0]?.id } };
   } catch (e: any) {
     return {
       ok: false,
@@ -137,5 +136,5 @@ export async function pickByCategoryAction(formData: FormData) {
       details: { category },
     };
   }
-  redirect(`/result/${data[0].id}`);
+  return { ok: true, data: { id: data?.[0]?.id } };
 }
