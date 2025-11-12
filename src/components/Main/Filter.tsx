@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { LuFilter, LuChevronDown } from 'react-icons/lu';
+import { useFilterStore } from '@/stores/filterStore';
+import { PlaceCategoryType, PlaceRegionType } from '@/types/places';
 
 const label = {
   region: {
@@ -16,36 +17,29 @@ const label = {
   category: { all: '전체', food: '음식점', cafe: '카페', sight: '관광지' },
 } as const;
 
+const regionOptions = [
+  { value: 'all', label: '전체' },
+  { value: 'nearby', label: '현재위치근처' },
+  { value: 'north', label: '제주시/북부' },
+  { value: 'south', label: '서귀포/남부' },
+  { value: 'east', label: '동부' },
+  { value: 'west', label: '서부' },
+];
+
+const categoryOptions = [
+  { value: 'all', label: '전체' },
+  { value: 'food', label: '음식점' },
+  { value: 'cafe', label: '카페' },
+  { value: 'sight', label: '관광지' },
+];
+
 export default function Filter() {
-  const router = useRouter();
-  const sp = useSearchParams();
-
   const [open, setOpen] = useState(false);
-  const [region, setRegion] = useState(sp.get('region') ?? 'all');
-  const [category, setCategory] = useState(sp.get('category') ?? 'all');
 
-  // 위치/반경 상태
-  const [lat, setLat] = useState<string | null>(sp.get('lat'));
-  const [lng, setLng] = useState<string | null>(sp.get('lng'));
-  const [radius, setRadius] = useState<string>(sp.get('r') ?? '2000'); // 기본 2km
-  const [locStatus, setLocStatus] = useState<'idle' | 'getting' | 'ok' | 'denied' | 'error'>(
-    'idle'
-  );
-
-  const regionOptions = [
-    { value: 'all', label: '전체' },
-    { value: 'nearby', label: '현재위치근처' },
-    { value: 'north', label: '제주시/북부' },
-    { value: 'south', label: '서귀포/남부' },
-    { value: 'east', label: '동부' },
-    { value: 'west', label: '서부' },
-  ];
-  const categoryOptions = [
-    { value: 'all', label: '전체' },
-    { value: 'food', label: '음식점' },
-    { value: 'cafe', label: '카페' },
-    { value: 'sight', label: '관광지' },
-  ];
+  const {
+  region, category, lat, lng, radius, locStatus,
+  setRegion, setCategory, setLocation, setRadius, setLocStatus
+  } = useFilterStore();
 
   // nearby 선택 시 위치 요청
   useEffect(() => {
@@ -57,8 +51,7 @@ export default function Filter() {
     setLocStatus('getting');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setLat(String(pos.coords.latitude));
-        setLng(String(pos.coords.longitude));
+        setLocation(String(pos.coords.latitude), String(pos.coords.longitude));
         setLocStatus('ok');
       },
       (err) => {
@@ -69,7 +62,7 @@ export default function Filter() {
     );
   }, [region]);
 
-  // 선택 필터 UI 표시
+  // 선택 항목 UI 표시
   const summaryChips = useMemo(() => {
     const chips: string[] = [];
     if (region !== 'all')
@@ -81,27 +74,6 @@ export default function Filter() {
     if (region === 'nearby' && lat && lng) chips.push(`반경: ${Number(radius) / 1000}km`);
     return chips;
   }, [region, category, lat, lng, radius]);
-
-  // 적용버튼 누를 경우 필터 값 저장하는 함수
-  const handleApply = () => {
-    const next = new URLSearchParams(sp);
-    next.set('region', region);
-    next.set('category', category);
-
-    // nearby면 좌표/반경을 쿼리에 넣고, 아니면 제거
-    if (region === 'nearby' && lat && lng) {
-      next.set('lat', lat);
-      next.set('lng', lng);
-      next.set('radius', radius);
-    } else {
-      next.delete('lat');
-      next.delete('lng');
-      next.delete('radius');
-    }
-
-    router.replace(`?${next.toString()}`, { scroll: false });
-    setOpen(false);
-  };
 
   return (
     <div className="relative inline-block w-full">
@@ -139,7 +111,7 @@ export default function Filter() {
                 key={r.value}
                 type="button"
                 className={`w-full rounded-xl border px-4 py-3 text-sm transition-colors ${region === r.value ? 'bg-brand-500 border-transparent text-white' : 'border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50'}`}
-                onClick={() => setRegion(r.value)}
+                onClick={() => setRegion(r.value as PlaceRegionType)}
               >
                 {r.label}
               </button>
@@ -152,7 +124,7 @@ export default function Filter() {
               {locStatus === 'getting' && '현재 위치를 가져오는 중…'}
               {locStatus === 'ok' && (
                 <div className="flex items-center justify-between gap-3">
-                  <span>위치 확보 완료</span>
+                  <span>현재 위치에서 얼마나?</span>
                   <select
                     className="rounded border border-neutral-300 px-2 py-1 text-xs"
                     value={radius}
@@ -179,7 +151,7 @@ export default function Filter() {
                 key={c.value}
                 type="button"
                 className={`'w-full border' rounded-xl px-4 py-3 text-sm transition-colors ${category === c.value ? 'bg-brand-500 border-transparent text-white' : 'border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50'}`}
-                onClick={() => setCategory(c.value)}
+                onClick={() => setCategory(c.value as PlaceCategoryType)}
               >
                 {c.label}
               </button>
@@ -188,10 +160,10 @@ export default function Filter() {
 
           <button
             className="font-mitme bg-brand-100 text-brand-800 hover:bg-brand-200 mt-5 w-full rounded-2xl py-3 text-center text-xl transition-colors"
-            onClick={handleApply}
+            onClick={() => setOpen(false)}
             disabled={region === 'nearby' && locStatus !== 'ok'}
           >
-            적용
+            닫기
           </button>
         </div>
       )}

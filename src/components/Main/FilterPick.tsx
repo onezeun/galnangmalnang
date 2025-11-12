@@ -1,9 +1,11 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
 import { LuDices } from 'react-icons/lu';
 import { pickPlaceAction } from '@/actions/pick-actions';
 import { useFormStatus } from 'react-dom';
+import { useFilterStore } from '@/stores/filterStore';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -23,22 +25,40 @@ function SubmitButton() {
 }
 
 const FilterPick = () => {
-  const sp = useSearchParams();
-  const region = sp.get('region') ?? 'all';
-  const category = sp.get('category') ?? 'all';
-  const lat = sp.get('lat') ?? '';
-  const lng = sp.get('lng') ?? '';
-  const r = sp.get('r') ?? '2000';
+  const router = useRouter();
+  const { region, category, lat, lng, radius } = useFilterStore();
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const formAction = async (formData: FormData) => {
+    const res = await pickPlaceAction(formData);
+    if (!res.ok) {
+      setErrorMsg(res.message);
+      return;
+    }
+    if (res.redirect) {
+      router.replace(res.redirect);
+      return;
+    }
+  };
 
   return (
-    <form action={pickPlaceAction} className="my-5">
+    <form action={formAction} className="my-5">
+      {/* 에러 배너 */}
+      {errorMsg && (
+        <div
+          role="alert"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
+          {errorMsg}
+        </div>
+      )}
       <input type="hidden" name="region" value={region} />
       <input type="hidden" name="category" value={category} />
-      {region === 'nearby' && (
+      {region === 'nearby' && lat && lng && (
         <>
           <input type="hidden" name="lat" value={lat} />
           <input type="hidden" name="lng" value={lng} />
-          <input type="hidden" name="r" value={r} />
+          <input type="hidden" name="r" value={radius} />
         </>
       )}
 
