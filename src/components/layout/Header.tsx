@@ -5,9 +5,10 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LuMenu, LuX } from 'react-icons/lu';
 import Logo from '@/components/common/Logo';
-import { getAuth, type AuthResult } from '@/actions/auth-actions';
+import { getAuthAction } from '@/actions/auth-actions';
 import { getSupabase } from '@/utils/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
+import { ActionResultType } from '@/types/action';
 
 type Item = { href: string; label: string; onClick?: () => void };
 
@@ -15,32 +16,10 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const { user, isLoggedIn, setAuth, reset } = useAuthStore();
+  const { isLoggedIn, reset } = useAuthStore();
   const supabase = useRef(getSupabase()).current;
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const { isLoggedIn, user } = await getAuth();
-        isLoggedIn ? setAuth(user) : reset();
-      } catch {
-        reset();
-      }
-    })();
-  }, [setAuth, reset]);
-
-  useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session?.user) {
-        setAuth({ id: session.user.id, email: session.user.email ?? null });
-      } else {
-        reset();
-      }
-    });
-    return () => sub.subscription.unsubscribe();
-  }, [supabase, setAuth, reset]);
-
-  // 메뉴 아이템 (deps에 isLoggedIn만 두면 충분)
+  // 메뉴 아이템
   const items: Item[] = useMemo(() => {
     if (!isLoggedIn) {
       return [{ href: '/login', label: '관리자 로그인' }];
@@ -108,7 +87,6 @@ export default function Header() {
 
       {/* 드롭다운 패널 */}
       <nav
-        id="mobile-nav"
         onClick={(e) => e.stopPropagation()}
         className={`fixed top-12 right-0 left-0 z-[1000] mx-auto max-w-[800px] border border-neutral-100 bg-white px-4 pb-4 transition duration-200 ${
           open ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'
@@ -127,8 +105,8 @@ export default function Header() {
               {item.onClick ? (
                 <button
                   className="block w-full text-left"
-                  onClick={async () => {
-                    await item.onClick?.();
+                  onClick={() => {
+                    item.onClick?.();
                     setOpen(false);
                   }}
                 >
