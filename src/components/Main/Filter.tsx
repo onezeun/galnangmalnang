@@ -32,10 +32,6 @@ export default function Filter() {
     'idle'
   );
 
-  const base = 'w-full rounded-xl px-4 py-3 text-sm transition-colors border';
-  const active = 'border-transparent bg-brand-500 text-white';
-  const idle = 'border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50';
-
   const regionOptions = [
     { value: 'all', label: '전체' },
     { value: 'nearby', label: '현재위치근처' },
@@ -73,6 +69,7 @@ export default function Filter() {
     );
   }, [region]);
 
+  // 선택 필터 UI 표시
   const summaryChips = useMemo(() => {
     const chips: string[] = [];
     if (region !== 'all')
@@ -85,6 +82,7 @@ export default function Filter() {
     return chips;
   }, [region, category, lat, lng, radius]);
 
+  // 적용버튼 누를 경우 필터 값 저장하는 함수
   const handleApply = () => {
     const next = new URLSearchParams(sp);
     next.set('region', region);
@@ -94,11 +92,11 @@ export default function Filter() {
     if (region === 'nearby' && lat && lng) {
       next.set('lat', lat);
       next.set('lng', lng);
-      next.set('r', radius);
+      next.set('radius', radius);
     } else {
       next.delete('lat');
       next.delete('lng');
-      next.delete('r');
+      next.delete('radius');
     }
 
     router.replace(`?${next.toString()}`, { scroll: false });
@@ -140,7 +138,7 @@ export default function Filter() {
               <button
                 key={r.value}
                 type="button"
-                className={`${base} ${region === r.value ? active : idle}`}
+                className={`w-full rounded-xl border px-4 py-3 text-sm transition-colors ${region === r.value ? 'bg-brand-500 border-transparent text-white' : 'border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50'}`}
                 onClick={() => setRegion(r.value)}
               >
                 {r.label}
@@ -180,7 +178,7 @@ export default function Filter() {
               <button
                 key={c.value}
                 type="button"
-                className={`${base} ${category === c.value ? active : idle}`}
+                className={`'w-full border' rounded-xl px-4 py-3 text-sm transition-colors ${category === c.value ? 'bg-brand-500 border-transparent text-white' : 'border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50'}`}
                 onClick={() => setCategory(c.value)}
               >
                 {c.label}

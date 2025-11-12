@@ -1,13 +1,10 @@
 import BackButton from '@/components/common/BackButton';
 import PlaceForm from '@/components/Place/Form';
-import { notFound } from 'next/navigation';
 
 type Props = { params: Promise<{ id: string }> };
 
-export default async function PlaceEdit({ params }: Props) {
-  const { id: idStr } = await params;
-  const id = Number(idStr);
-  if (!Number.isFinite(id)) notFound();
+export default async function PlaceEdit({ params }: { params: { id: string } }) {
+  const placeId = Number(params.id);
 
   return (
     <main className="mx-auto max-w-md px-4 py-6">
@@ -15,7 +12,7 @@ export default async function PlaceEdit({ params }: Props) {
         <h1 className="font-mitme mb-4 text-4xl">장소 수정</h1>
         <BackButton />
       </div>
-      <PlaceForm mode="edit" id={id} />
+      <PlaceForm mode="edit" id={placeId} />
     </main>
   );
 }
