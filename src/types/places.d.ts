@@ -1,5 +1,6 @@
-export type PlaceCategoryType = 'food' | 'cafe' | 'sight';
-export type PlaceRegionType = 'north' | 'south' | 'east' | 'west';
+export type PlaceCategoryType = 'all' | 'food' | 'cafe' | 'sight';
+export type PlaceRegionType = 'all' | 'nearby' | 'north' | 'south' | 'east' | 'west';
+export type PlaceStatusType = 'draft' | 'published' | 'hidden';
 
 export type PlaceFormValuesType = {
   id?: number;
@@ -14,27 +15,20 @@ export type PlaceFormValuesType = {
   image_url?: string | null; // 기존 대표 이미지 미리보기용
 };
 
-export type PlaceStatusType = 'draft' | 'published' | 'hidden';
-
 export type PlaceRowType = {
   id: number;
   name: string;
-  category: PlaceCategoryType; // 'food' | 'cafe' | 'sight'
-  region: PlaceRegionType; // 'north' | 'south' | 'east' | 'west'
+  category: PlaceCategoryType; // 'all' | 'food' | 'cafe' | 'sight'
+  region: PlaceRegionType; // 'all' | 'nearby' | 'north' | 'south' | 'east' | 'west'
   status: PlaceStatus;
   address_line1: string | null;
   created_at: string; // ISO
 };
 
-export type ListPlacesParamsType = {
+export type PlaceListParamsType = {
   q?: string;
   category?: '' | PlaceCategoryType;
   region?: '' | PlaceRegionType;
   page?: number;
   pageSize?: number;
-};
-
-export type ListPlacesResultType = {
-  rows: PlaceRow[];
-  total: number;
 };
