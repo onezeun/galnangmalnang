@@ -1,4 +1,3 @@
-// components/Result/PlaceDetailCard.tsx
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
