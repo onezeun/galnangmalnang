@@ -1,9 +1,9 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { getPlaceByIdAction } from '@/actions/place-actions';
-import { LuShare2 } from 'react-icons/lu';
 import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { LuShare2 } from 'react-icons/lu';
+import { getPlaceByIdAction } from '@/actions/place-actions';
 
 type Props = { id: number };
 

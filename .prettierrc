@@ -10,5 +10,23 @@
   "arrowParens": "always",
   "jsxBracketSameLine": false,
   "endOfLine": "auto",
-  "plugins": ["prettier-plugin-tailwindcss"]
+  "importOrder": [
+    "^(react|next|next/.*)$",
+    "<THIRD_PARTY_MODULES>",
+    "^@/config/(.*)$",
+    "^@/types/(.*)$",
+    "^@/utils/(.*)$",
+    "^@/stores/(.*)$",
+    "^@/actions/(.*)$",
+    "^@/components/(common|layout)/(.*)$",
+    "^@/components/(Main|Place|Result)/(.*)$",
+    "^@/components/(.*)$",
+    "^@/app/(.*)$",
+    "^@/(.*)$",
+    "^[./]",
+    ".+\\.(css|scss|sass)$"
+  ],
+  "importOrderSeparation": false,
+  "importOrderSortSpecifiers": true,
+  "plugins": ["prettier-plugin-tailwindcss", "@trivago/prettier-plugin-sort-imports"]
 }

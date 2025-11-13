@@ -1,8 +1,8 @@
+import { Suspense } from 'react';
 import Logo from '@/components/common/Logo';
 import Filter from '@/components/Main/Filter';
 import FilterPick from '@/components/Main/FilterPick';
 import QuickPick from '@/components/Main/QuickPick';
-import { Suspense } from 'react';
 
 export default function Home() {
   return (

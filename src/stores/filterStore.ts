@@ -1,7 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import { PlaceRegionType, PlaceCategoryType } from '@/types/places';
+import { PlaceCategoryType, PlaceRegionType } from '@/types/places';
 
 type LocStatus = 'idle' | 'getting' | 'ok' | 'denied' | 'error';
 

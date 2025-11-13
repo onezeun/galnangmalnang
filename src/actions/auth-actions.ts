@@ -1,7 +1,7 @@
 'use server';
-
+import { ActionResultType } from '@/types/action';
+import { ERR } from '@/config';
 import { createServerSupabaseClient } from '@/utils/supabase/server';
-import { ActionResultType, ERR } from '@/types/action';
 
 // 유저정보조회(로그인상태확인)
 export async function getAuthAction(): Promise<ActionResultType> {
@@ -11,11 +11,12 @@ export async function getAuthAction(): Promise<ActionResultType> {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return {
-    ok: false,
-    type: ERR.UNAUTHORIZED.type,
-    message: '사용자 정보를 가져오지 못했습니다.',
-  };
+  if (!user)
+    return {
+      ok: false,
+      type: ERR.UNAUTHORIZED.type,
+      message: '사용자 정보를 가져오지 못했습니다.',
+    };
 
   return { ok: true, data: { isLoggedIn: true, user: { id: user.id, email: user.email } } };
 }
@@ -41,7 +42,7 @@ export async function signInAction(formData: FormData): Promise<ActionResultType
       };
     }
 
-  return { ok: true, data: { isLoggedIn: true, user: { id: user.id, email: user.email } } };
+    return { ok: true, data: { isLoggedIn: true, user: { id: user.id, email: user.email } }, redirect: '/admin/place-list' };
   } catch (e: any) {
     return {
       ok: false,

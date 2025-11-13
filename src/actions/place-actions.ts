@@ -1,10 +1,11 @@
 'use server';
 
-import { createServerSupabaseClient } from '@/utils/supabase/server';
-import { ERR, ActionResultType } from '@/types/action';
-import { geocodeByAddress } from '@/utils/geocoding';
-import type { Database } from '@/types_db';
+import { ActionResultType } from '@/types/action';
 import * as PType from '@/types/places';
+import { geocodeByAddress } from '@/utils/geocoding';
+import { createServerSupabaseClient } from '@/utils/supabase/server';
+import { ERR } from '@/config';
+import type { Database } from '@/types_db';
 
 type PlacesInsert = Database['public']['Tables']['places']['Insert'];
 type PlacesUpdate = Database['public']['Tables']['places']['Update'];
@@ -310,11 +311,12 @@ export async function deletePlaceAction(id: number) {
   }
 
   const { error } = await supabase.from('places').delete().eq('id', id);
-  if (error) return {
-    ok: false,
-    type: ERR.INTERNAL_SERVER_ERROR.type,
-    message: '삭제 중 오류가 발생했습니다.',
-    details: error.message,
-  };
+  if (error)
+    return {
+      ok: false,
+      type: ERR.INTERNAL_SERVER_ERROR.type,
+      message: '삭제 중 오류가 발생했습니다.',
+      details: error.message,
+    };
   return { ok: true, data: { deleted: true } };
 }

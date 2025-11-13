@@ -1,7 +1,8 @@
 'use server';
 
+import { ActionResultType } from '@/types/action';
 import { createServerSupabaseClient } from '@/utils/supabase/server';
-import { ActionResultType, ERR } from '@/types/action';
+import { ERR } from '@/config';
 
 // 필터 랜덤 뽑기
 export async function pickPlaceAction(formData: FormData): Promise<ActionResultType> {
@@ -67,21 +68,26 @@ export async function pickPlaceAction(formData: FormData): Promise<ActionResultT
         };
       }
 
-      return { ok: true, data: { id: nearbyData?.[0]?.id } };
+      return {
+        ok: true,
+        data: { id: nearbyData?.[0]?.id },
+        redirect: `/result/${nearbyData?.[0]?.id}`,
+      };
     }
 
     // 2) 그 외(전체/특정 지역): 기존 랜덤
     // 필터 조건에 맞는 장소 리스트 함수 pick_one_random
     /*
-  SELECT id FROM places
-  WHERE
-    (region IS NULL OR places.region = region)
-    AND (category IS NULL OR places.category = category)
-  ORDER BY RANDOM() LIMIT 1;
-  */
+    SELECT id FROM places
+    WHERE
+      (region IS NULL OR places.region = region)
+      AND (category IS NULL OR places.category = category)
+    ORDER BY RANDOM() LIMIT 1;
+    */
+
     const { data: randomData, error: randomError } = await supabase.rpc('pick_one_random', {
-      region,
-      category,
+      in_region: region,
+      in_category: category,
     });
     if (randomError) {
       return {
@@ -99,7 +105,11 @@ export async function pickPlaceAction(formData: FormData): Promise<ActionResultT
         details: { region, category },
       };
     }
-    return { ok: true, data: { id: randomData?.[0]?.id } };
+    return {
+      ok: true,
+      data: { id: randomData?.[0]?.id },
+      redirect: `/result/${randomData?.[0]?.id}`,
+    };
   } catch (e: any) {
     return {
       ok: false,
@@ -116,8 +126,8 @@ export async function pickByCategoryAction(formData: FormData) {
   const supabase = await createServerSupabaseClient();
 
   const { data, error } = await supabase.rpc('pick_one_random', {
-    region: '', // 전체
-    category, // 'food' | 'cafe' | 'sight'
+    in_region: '', // 전체
+    in_category: category, // 'food' | 'cafe' | 'sight'
   });
 
   if (error) {
@@ -136,5 +146,5 @@ export async function pickByCategoryAction(formData: FormData) {
       details: { category },
     };
   }
-  return { ok: true, data: { id: data?.[0]?.id } };
+  return { ok: true, data: { id: data?.[0]?.id }, redirect: `/result/${data?.[0]?.id}` };
 }

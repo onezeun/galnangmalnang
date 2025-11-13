@@ -1,8 +1,8 @@
 // 카카오 주소검색 API
 'use server';
 
+import { ERR } from '@/config';
 import { KAKAO_API_KEY } from '@/config';
-import { ERR } from '@/types/action';
 
 export async function geocodeByAddress(address: string) {
   const url = new URL('https://dapi.kakao.com/v2/local/search/address.json');

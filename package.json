@@ -6,8 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
     "format": "npx prettier --write src",
     "generate-types": "npx supabase gen types typescript --project-id ztpxfdcnpxxkmmolzqxv --schema public > types_db.ts"
   },
@@ -17,6 +17,7 @@
     }
   },
   "dependencies": {
+    "framer-motion": "^12.23.24",
     "next": "15.5.3",
     "react": "19.1.0",
     "react-dom": "19.1.0"
@@ -28,6 +29,7 @@
     "@tailwindcss/postcss": "^4",
     "@tanstack/react-query": "^5.87.4",
     "@tanstack/react-query-devtools": "^5.87.4",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -35,6 +37,7 @@
     "eslint-config-next": "^15.5.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-unused-imports": "^4.2.0",
     "husky": "^9.1.7",
     "prettier": "^3.6.2",

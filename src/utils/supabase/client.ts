@@ -1,9 +1,9 @@
 'use client';
 
 import { createBrowserClient } from '@supabase/ssr';
-import type { Database } from '@/types_db';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { SUPABASE } from '@/config';
+import type { Database } from '@/types_db';
 
 let _client: SupabaseClient<Database> | null = null;
 

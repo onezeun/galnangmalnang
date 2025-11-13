@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { LuFilter, LuChevronDown } from 'react-icons/lu';
-import { useFilterStore } from '@/stores/filterStore';
+import { LuChevronDown, LuFilter } from 'react-icons/lu';
 import { PlaceCategoryType, PlaceRegionType } from '@/types/places';
+import { useFilterStore } from '@/stores/filterStore';
 
 const label = {
   region: {
@@ -37,8 +37,17 @@ export default function Filter() {
   const [open, setOpen] = useState(false);
 
   const {
-  region, category, lat, lng, radius, locStatus,
-  setRegion, setCategory, setLocation, setRadius, setLocStatus
+    region,
+    category,
+    lat,
+    lng,
+    radius,
+    locStatus,
+    setRegion,
+    setCategory,
+    setLocation,
+    setRadius,
+    setLocStatus,
   } = useFilterStore();
 
   // nearby 선택 시 위치 요청

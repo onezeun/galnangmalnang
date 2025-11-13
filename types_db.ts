@@ -416,7 +416,7 @@ export type Database = {
         }[]
       }
       pick_one_random: {
-        Args: { category: string; region: string }
+        Args: { in_category?: string; in_region?: string }
         Returns: {
           id: number
         }[]

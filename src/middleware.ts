@@ -1,6 +1,6 @@
 // middleware.ts
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { type NextRequest, NextResponse } from 'next/server';
+import { type CookieOptions, createServerClient } from '@supabase/ssr';
 import { SUPABASE } from './config';
 
 /** Supabase 클라이언트 + 쿠키 동기화 */

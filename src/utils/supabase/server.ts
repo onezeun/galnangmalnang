@@ -1,9 +1,9 @@
 'use server';
 
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { Database } from '@/types_db';
+import { type CookieOptions, createServerClient } from '@supabase/ssr';
 import { SUPABASE } from '@/config';
+import { Database } from '@/types_db';
 
 /**
  * 서버 환경(Server Component, Server Action 등)에서 사용할 Supabase 클라이언트 생성 함수

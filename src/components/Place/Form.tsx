@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
-import { FiUploadCloud as LuUploadCloud, FiImage as LuImage } from 'react-icons/fi';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createPlaceAction, updatePlaceAction, getPlaceByIdAction } from '@/actions/place-actions';
-import type { PlaceCategoryType, PlaceRegionType, PlaceFormValuesType } from '@/types/places';
+import { FiImage as LuImage, FiUploadCloud as LuUploadCloud } from 'react-icons/fi';
+import type { PlaceCategoryType, PlaceFormValuesType, PlaceRegionType } from '@/types/places';
+import { createPlaceAction, getPlaceByIdAction, updatePlaceAction } from '@/actions/place-actions';
 
 type Props = {
   mode: 'create' | 'edit';

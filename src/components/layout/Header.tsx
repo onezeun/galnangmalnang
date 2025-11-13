@@ -4,11 +4,9 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LuMenu, LuX } from 'react-icons/lu';
-import Logo from '@/components/common/Logo';
-import { getAuthAction } from '@/actions/auth-actions';
 import { getSupabase } from '@/utils/supabase/client';
 import { useAuthStore } from '@/stores/authStore';
-import { ActionResultType } from '@/types/action';
+import Logo from '@/components/common/Logo';
 
 type Item = { href: string; label: string; onClick?: () => void };
 
