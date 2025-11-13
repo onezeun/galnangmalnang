@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { LuMenu, LuX } from 'react-icons/lu';
 import { getSupabase } from '@/utils/supabase/client';
-import { useAuthStore } from '@/stores/authStore';
+import { getAuthAction } from '@/actions/auth-actions';
 import Logo from '@/components/common/Logo';
 
 type Item = { href: string; label: string; onClick?: () => void };
@@ -14,8 +15,15 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const { isLoggedIn, reset } = useAuthStore();
   const supabase = useRef(getSupabase()).current;
+  const qc = useQueryClient();
+
+  const { data } = useQuery({
+    queryKey: ['auth'],
+    queryFn: getAuthAction,
+  });
+
+  const isLoggedIn = data?.ok ?? false;
 
   // 메뉴 아이템
   const items: Item[] = useMemo(() => {
@@ -27,8 +35,9 @@ export default function Header() {
       href: '#logout',
       label: '로그아웃',
       onClick: async () => {
-        reset();
         await supabase.auth.signOut();
+        // auth 쿼리 무효화 → getAuthAction 다시 호출 → isLoggedIn false로
+        qc.invalidateQueries({ queryKey: ['auth'] });
         if (pathname.startsWith('/admin')) router.push('/');
       },
     };
@@ -39,7 +48,7 @@ export default function Header() {
       { href: '/admin/place-list', label: '등록된 리스트 확인' },
       logout,
     ];
-  }, [isLoggedIn, pathname, router, supabase, reset]);
+  }, [isLoggedIn, pathname, router, supabase, qc]);
 
   useEffect(() => {
     if (!open) return;

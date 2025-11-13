@@ -44,7 +44,7 @@ export async function signInAction(formData: FormData): Promise<ActionResultType
 
     return {
       ok: true,
-      data: { isLoggedIn: true, user: { id: user.id, email: user.email } },
+      data: { id: user.id, email: user.email },
       redirect: '/admin/place-list',
     };
   } catch (e: any) {
