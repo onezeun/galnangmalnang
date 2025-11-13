@@ -1,16 +1,17 @@
 'use server';
 
+import { ERR } from '@/config/errors';
 import { ActionResultType } from '@/types/action';
+import { PickPlacePayloadType } from '@/types/pick';
 import { createServerSupabaseClient } from '@/utils/supabase/server';
-import { ERR } from '@/config';
 
 // 필터 랜덤 뽑기
-export async function pickPlaceAction(formData: FormData): Promise<ActionResultType> {
-  const region = String(formData.get('region') ?? '');
-  const category = String(formData.get('category') ?? '');
-  const lat = Number(formData.get('lat'));
-  const lng = Number(formData.get('lng'));
-  const radius = Number(formData.get('radius') ?? 2000); // 반경(m), 기본 2km
+export async function pickPlaceAction(payload: PickPlacePayloadType): Promise<ActionResultType> {
+  const region = payload.region ?? '';
+  const category = payload.category ?? '';
+  const lat = payload.lat ?? null;
+  const lng = payload.lng ?? null;
+  const radius = payload.radius ?? 2000; // 반경(m), 기본 2km
 
   const supabase = await createServerSupabaseClient();
   try {
@@ -120,9 +121,7 @@ export async function pickPlaceAction(formData: FormData): Promise<ActionResultT
   }
 }
 
-export async function pickByCategoryAction(formData: FormData) {
-  const category = String(formData.get('category') ?? '').trim();
-
+export async function pickByCategoryAction(category: string) {
   const supabase = await createServerSupabaseClient();
 
   const { data, error } = await supabase.rpc('pick_one_random', {

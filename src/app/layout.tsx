@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-import './globals.css';
+import { QueryClient, dehydrate } from '@tanstack/react-query';
 import ReactQueryClientProvider from '@/config/ReactQueryClientProvider';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import HydrateAuth from '@/components/layout/HydrateAuth';
 import { getAuthAction } from '@/actions/auth-actions';
+import Footer from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: '갈낭말낭',
@@ -16,14 +16,18 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-    const res = await getAuthAction(); // 서버에서 1회만 확인
-    const initialUser = res.ok && res.data.isLoggedIn ? res.data.user : null;
+  const qc = new QueryClient();
+  await qc.prefetchQuery({
+    queryKey: ['auth'],
+    queryFn: getAuthAction,
+  });
+  const dehydratedState = dehydrate(qc);
+
   return (
     <html lang="ko">
       <body className="font-pretendard antialiased">
-        <ReactQueryClientProvider>
+        <ReactQueryClientProvider dehydratedState={dehydratedState}>
           <div className="bg-brand-50 mx-auto max-w-[800px]">
-            <HydrateAuth initial={initialUser} />
             <Header />
             <main className="mx-4 min-h-[100dvh]">{children}</main>
             <Footer />

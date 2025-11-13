@@ -4,23 +4,20 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { LuShare2 } from 'react-icons/lu';
 import { getPlaceByIdAction } from '@/actions/place-actions';
+import { optionLabels } from '@/config/options';
+import { PlaceCategoryType } from '@/types/places';
 
 type Props = { id: number };
-
-const categoryLabel: Record<string, string> = {
-  food: '음식점',
-  cafe: '카페',
-  sight: '관광지',
-};
 
 export default function PlaceDetailCard({ id }: Props) {
   const router = useRouter();
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['place', id],
     queryFn: async () => {
-      const row = await getPlaceByIdAction(id);
-      if (!row) throw new Error('대상을 찾을 수 없습니다.');
-      return row;
+      const res = await getPlaceByIdAction(id);
+      if (!res.ok) throw new Error('대상을 찾을 수 없습니다.');
+      console.log(res)
+      return res.data;
     },
   });
 
@@ -59,7 +56,7 @@ export default function PlaceDetailCard({ id }: Props) {
         <div className="flex flex-wrap gap-2 p-3">
           {category && (
             <span className="bg-brand-700/90 inline-block rounded-full px-2.5 py-1 text-xs text-white">
-              {categoryLabel[category] ?? category}
+              {optionLabels.category[category as PlaceCategoryType] ?? category}
             </span>
           )}
           {tags?.map((tag: string) => (

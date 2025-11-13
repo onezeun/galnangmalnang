@@ -1,10 +1,16 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FiImage as LuImage, FiUploadCloud as LuUploadCloud } from 'react-icons/fi';
-import type { PlaceCategoryType, PlaceFormValuesType, PlaceRegionType } from '@/types/places';
+import { categoryOptions, regionOptions } from '@/config/options';
+import type {
+  PlaceCategoryType,
+  PlaceFormValuesType,
+  PlaceRegionType,
+  PlaceRowType,
+} from '@/types/places';
 import { createPlaceAction, getPlaceByIdAction, updatePlaceAction } from '@/actions/place-actions';
 
 type Props = {
@@ -12,35 +18,40 @@ type Props = {
   id?: number; // edit 모드일 때만 사용
 };
 
-export const categories = [
-  { value: 'food', label: '음식점' },
-  { value: 'cafe', label: '카페' },
-  { value: 'sight', label: '관광지' },
-] as const;
-
-export const regions = [
-  { value: 'north', label: '제주시/북부' },
-  { value: 'south', label: '서귀포/남부' },
-  { value: 'east', label: '동부' },
-  { value: 'west', label: '서부' },
-] as const;
+// 신규 장소 등록 기본 값
+const DEFAULT_INITIAL: PlaceFormValuesType = {
+  // id는 edit 에서만 사용
+  name: '',
+  category: 'food' as PlaceCategoryType,
+  region: 'north' as PlaceRegionType,
+  description: '',
+  address: '',
+  phone: '',
+  tags: [],
+  image_url: null,
+  hours: '',
+};
 
 export default function PlaceForm({ mode, id }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [toast, setToast] = useState<{ ok: boolean; msg: string } | null>(null);
-  const formRef = useRef<HTMLFormElement>(null);
 
   const qc = useQueryClient();
 
-  // 상세 불러오기 (edit + id 있을 때만)
-  const { data, isLoading, isError, error } = useQuery({
+  // 수정 모드일 때 기존 데이터 불러오기
+  const {
+    data: placeData,
+    isLoading,
+    isError,
+    error,
+  } = useQuery<PlaceRowType | undefined>({
     queryKey: ['place', id],
     queryFn: async () => {
       if (!(mode === 'edit' && typeof id === 'number')) return undefined;
-      const row = await getPlaceByIdAction(id);
-      if (!row) throw new Error('대상을 찾을 수 없습니다.');
-      return row;
+      const res = await getPlaceByIdAction(id);
+      if (!res.ok) throw new Error(res.message ?? '대상을 찾을 수 없습니다.');
+      return res.data;
     },
     enabled: mode === 'edit' && typeof id === 'number',
   });
@@ -51,22 +62,42 @@ export default function PlaceForm({ mode, id }: Props) {
       const url = URL.createObjectURL(file);
       setPreview(url);
       return () => URL.revokeObjectURL(url);
-    } else if (mode === 'edit' && data?.image_url) {
-      setPreview(data.image_url);
+    }
+
+    if (mode === 'edit' && placeData?.image_url) {
+      setPreview(placeData.image_url);
     } else {
       setPreview(null);
     }
-  }, [file, mode, data?.image_url]);
+  }, [file, mode, placeData?.image_url]);
 
-  const errors = useMemo(() => [] as string[], []);
+  // 입력 기본값 (create: 빈값, edit: 불러온 값)
+  const initial: PlaceFormValuesType = useMemo(() => {
+    if (mode === 'edit' && placeData) {
+      return {
+        id: Number(placeData.id),
+        name: String(placeData.name ?? ''),
+        category: placeData.category as PlaceCategoryType,
+        region: placeData.region as PlaceRegionType,
+        description: placeData.description ?? '',
+        address: placeData.address_line1 ?? '',
+        phone: placeData.phone ?? '',
+        tags: Array.isArray(placeData.tags) ? placeData.tags.map(String) : [],
+        image_url: placeData.image_url ?? null,
+        hours: placeData.hours ?? '',
+      };
+    }
+    return DEFAULT_INITIAL;
+  }, [mode, placeData]);
 
+  // 생성/수정 mutation
   const mutation = useMutation({
     mutationFn: async (fd: FormData) => {
       const res = mode === 'edit' ? await updatePlaceAction(fd) : await createPlaceAction(fd);
-      if (!res.ok) throw new Error(res.msg);
+      if (!res.ok) throw new Error(res.message ?? '요청 처리 중 오류가 발생했습니다.');
       return res;
     },
-    onSuccess: () => {
+    onSuccess: (_, __) => {
       qc.invalidateQueries({ queryKey: ['places'] });
       if (mode === 'edit' && typeof id === 'number') {
         qc.invalidateQueries({ queryKey: ['place', id] });
@@ -74,30 +105,31 @@ export default function PlaceForm({ mode, id }: Props) {
     },
   });
 
+  // 제출 핸들러
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setToast(null);
 
     const form = e.currentTarget;
-    if (errors.length) {
-      setToast({ ok: false, msg: errors[0] });
-      return;
+    const fd = new FormData(form);
+
+    if (file) {
+      fd.set('image', file);
     }
 
-    const fd = new FormData(form);
-    if (file) fd.set('image', file);
-
-    // edit 모드면 id 보장 주입
+    // edit 모드면 id 입력
     if (mode === 'edit' && typeof id === 'number' && !fd.get('id')) {
       fd.set('id', String(id));
     }
 
     mutation.mutate(fd, {
-      onSuccess: (r: any) => {
+      onSuccess: (res: any) => {
         setToast({
           ok: true,
-          msg: r.msg ?? (mode === 'edit' ? '수정이 완료되었습니다.' : '등록이 완료되었습니다.'),
+          msg:
+            res.message ?? (mode === 'edit' ? '수정이 완료되었습니다.' : '등록이 완료되었습니다.'),
         });
+
         if (mode === 'create') {
           form.reset();
           setFile(null);
@@ -123,12 +155,12 @@ export default function PlaceForm({ mode, id }: Props) {
     }
     if (isLoading) {
       return (
-        <div className="animate-pulse rounded-md border p-3 text-sm text-neutral-500">
+        <div className="animate-pulse rounded-md p-3 text-sm text-neutral-500 text-center">
           로딩 중...
         </div>
       );
     }
-    if (isError || !data) {
+    if (isError || !placeData) {
       return (
         <div className="rounded-md bg-rose-50 p-3 text-sm text-rose-700">
           {(error as Error)?.message ?? '로딩 중 오류가 발생했습니다.'}
@@ -137,62 +169,39 @@ export default function PlaceForm({ mode, id }: Props) {
     }
   }
 
-  // 입력 기본값 (create: 빈값, edit: 불러온 값)
-  const initial: Partial<PlaceFormValuesType> =
-    mode === 'edit' && data
-      ? {
-          id: Number(data.id),
-          name: String(data.name ?? ''),
-          category: data.category as PlaceCategoryType,
-          region: data.region as PlaceRegionType,
-          description: data.description ?? '',
-          address: data.address_line1 ?? '',
-          phone: data.phone ?? '',
-          tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
-          image_url: data.image_url ?? null,
-          hours: data.hours ?? '',
-        }
-      : {
-          name: '',
-          category: 'food' as PlaceCategoryType,
-          region: 'north' as PlaceRegionType,
-          description: '',
-          address: '',
-          phone: '',
-          tags: [],
-          image_url: null,
-          hours: '',
-        };
-
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {mode === 'edit' && typeof initial.id === 'number' && (
         <input type="hidden" name="id" defaultValue={String(initial.id)} />
       )}
 
       {/* 이름 */}
       <div>
-        <label className="mb-1 block text-sm font-medium text-neutral-800">이름 *</label>
+        <label className="mb-1 block text-sm font-medium text-neutral-800">
+          이름 <span className="text-red-500 font-bold align-middle">*</span>
+        </label>
         <input
           name="name"
-          defaultValue={initial.name ?? ''}
+          defaultValue={initial.name}
           required
-          className="ring-brand-500 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
-          placeholder="예) 카페 멜몬도"
+          className="bg-white ring-brand-500 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
+          placeholder="예) 할머니네 흑돼지집"
         />
       </div>
 
       {/* 카테고리/지역 */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1 block text-sm font-medium text-neutral-800">카테고리 *</label>
+          <label className="mb-1 block text-sm font-medium text-neutral-800">
+            카테고리 <span className="text-red-500 font-bold align-middle">*</span>
+          </label>
           <select
             name="category"
-            defaultValue={initial.category ?? 'food'}
+            defaultValue={initial.category}
             required
-            className="ring-brand-500 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
+            className="bg-white ring-brand-500 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
           >
-            {categories.map((c) => (
+            {categoryOptions.map((c) => (
               <option key={c.value} value={c.value}>
                 {c.label}
               </option>
@@ -200,14 +209,16 @@ export default function PlaceForm({ mode, id }: Props) {
           </select>
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-neutral-800">지역 *</label>
+          <label className="mb-1 block text-sm font-medium text-neutral-800">
+            지역 <span className="text-red-500 font-bold align-middle">*</span>
+          </label>
           <select
             name="region"
             defaultValue={initial.region ?? 'north'}
             required
-            className="ring-brand-500 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
+            className="bg-white ring-brand-500 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
           >
-            {regions.map((r) => (
+            {regionOptions.map((r) => (
               <option key={r.value} value={r.value}>
                 {r.label}
               </option>
@@ -223,7 +234,7 @@ export default function PlaceForm({ mode, id }: Props) {
           name="description"
           defaultValue={initial.description ?? ''}
           rows={3}
-          className="ring-brand-500 w-full resize-none rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
+          className="bg-white ring-brand-500 w-full resize-none rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
           placeholder="간단한 한 줄 소개나 메모"
         />
       </div>
@@ -234,7 +245,7 @@ export default function PlaceForm({ mode, id }: Props) {
         <input
           name="address"
           defaultValue={initial.address ?? ''}
-          className="ring-brand-500 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
+          className="bg-white ring-brand-500 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
           placeholder="제주특별자치도 ..."
         />
       </div>
@@ -243,7 +254,7 @@ export default function PlaceForm({ mode, id }: Props) {
         <input
           name="phone"
           defaultValue={initial.phone ?? ''}
-          className="ring-brand-500 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
+          className="bg-white ring-brand-500 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
           placeholder="064-000-0000"
         />
       </div>
@@ -252,12 +263,12 @@ export default function PlaceForm({ mode, id }: Props) {
         <input
           name="hours"
           defaultValue={initial.hours ?? ''}
-          className="ring-brand-500 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
+          className="bg-white ring-brand-500 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
           placeholder="예) 매일 09:00~21:00 (주말 10:00~20:00)"
         />
       </div>
 
-      {/* 태그: CSV */}
+      {/* 태그*/}
       <div>
         <label className="mb-1 block text-sm font-medium text-neutral-800">
           태그 (쉼표로 구분)
@@ -265,7 +276,7 @@ export default function PlaceForm({ mode, id }: Props) {
         <input
           name="tags"
           defaultValue={(initial.tags ?? []).join(', ')}
-          className="ring-brand-500 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
+          className="bg-white ring-brand-500 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
           placeholder="예) 해산물, 뷰맛집, 브런치"
         />
       </div>
@@ -321,7 +332,7 @@ export default function PlaceForm({ mode, id }: Props) {
         <button
           type="submit"
           disabled={submitting}
-          className={`bg-brand-500 hover:bg-brand-600 w-full rounded-xl py-3 text-center text-sm font-semibold text-white shadow-sm transition ${
+          className={`cursor-pointer bg-brand-500 hover:bg-brand-600 w-full rounded-xl py-3 text-center text-sm font-semibold text-white shadow-sm transition ${
             submitting ? 'opacity-60' : ''
           }`}
         >
