@@ -52,7 +52,7 @@ export default function Filter() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="focus:ring-brand-500 flex w-full items-center justify-between rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 shadow-sm hover:bg-neutral-50 focus:ring-2 focus:outline-none"
+        className="cursor-pointer focus:ring-brand-500 flex w-full items-center justify-between rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 shadow-sm hover:bg-neutral-50 focus:ring-2 focus:outline-none"
       >
         <span className="inline-flex items-center gap-2">
           <LuFilter className="h-4 w-4 text-neutral-500" />
@@ -64,7 +64,7 @@ export default function Filter() {
       </button>
 
       {summaryChips.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-2">
+        <div className="mt-2 flex flex-wrap gap-2 cursor-default">
           {summaryChips.map((t) => (
             <span key={t} className="bg-brand-50 text-brand-800 rounded-full px-3 py-1 text-xs">
               {t}
@@ -76,13 +76,13 @@ export default function Filter() {
       {open && (
         <div className="mt-2 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
           {/* 지역 */}
-          <h3 className="text-brand-900 font-mitme mb-2 text-xl">지역</h3>
+          <h3 className="text-brand-900 font-mitme mb-2 text-xl cursor-default">지역</h3>
           <div className="grid grid-cols-2 gap-3">
             {regionOptions.map((r) => (
               <button
                 key={r.value}
                 type="button"
-                className={`w-full rounded-xl border px-4 py-3 text-sm transition-colors ${region === r.value ? 'bg-brand-500 border-transparent text-white' : 'border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50'}`}
+                className={`cursor-pointer w-full rounded-xl border px-4 py-3 text-sm transition-colors ${region === r.value ? 'bg-brand-500 border-transparent text-white' : 'border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50'}`}
                 onClick={() => setRegion(r.value as PlaceRegionType)}
               >
                 {r.label}
@@ -95,7 +95,7 @@ export default function Filter() {
             <div className="mt-3 rounded-md bg-neutral-50 px-3 py-2 text-xs text-neutral-700">
               {locStatus === 'getting' && '현재 위치를 가져오는 중…'}
               {locStatus === 'ok' && (
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-3 cursor-default">
                   <span>현재 위치에서 얼마나?</span>
                   <select
                     className="rounded border border-neutral-300 px-2 py-1 text-xs"
@@ -116,13 +116,13 @@ export default function Filter() {
           )}
 
           {/* 카테고리 */}
-          <h3 className="text-brand-900 font-mitme mt-5 mb-2 text-xl">카테고리</h3>
+          <h3 className="text-brand-900 font-mitme mt-5 mb-2 text-xl cursor-default">카테고리</h3>
           <div className="grid grid-cols-2 gap-3">
             {categoryOptions.map((c) => (
               <button
                 key={c.value}
                 type="button"
-                className={`'w-full border' rounded-xl px-4 py-3 text-sm transition-colors ${category === c.value ? 'bg-brand-500 border-transparent text-white' : 'border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50'}`}
+                className={`cursor-pointer w-full border rounded-xl px-4 py-3 text-sm transition-colors ${category === c.value ? 'bg-brand-500 border-transparent text-white' : 'border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50'}`}
                 onClick={() => setCategory(c.value as PlaceCategoryType)}
               >
                 {c.label}
@@ -131,7 +131,7 @@ export default function Filter() {
           </div>
 
           <button
-            className="font-mitme bg-brand-100 text-brand-800 hover:bg-brand-200 mt-5 w-full rounded-2xl py-3 text-center text-xl transition-colors"
+            className="cursor-pointer font-mitme bg-brand-100 text-brand-800 hover:bg-brand-200 mt-5 w-full rounded-2xl py-3 text-center text-xl transition-colors"
             onClick={() => setOpen(false)}
             disabled={region === 'nearby' && locStatus !== 'ok'}
           >

@@ -35,7 +35,7 @@ const FilterPick = () => {
       <button
         onClick={() => mutate()}
         disabled={isPending}
-        className={`font-mitme flex h-48 w-full items-center justify-center gap-2 rounded-xl text-5xl text-white shadow-xl transition ${
+        className={`cursor-pointer font-mitme flex h-48 w-full items-center justify-center gap-2 rounded-xl text-5xl text-white shadow-xl transition ${
           isPending
             ? 'bg-brand-400 cursor-not-allowed opacity-70'
             : 'bg-brand-500 hover:bg-brand-600'

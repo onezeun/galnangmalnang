@@ -48,7 +48,7 @@ export default function QuickPick() {
                   setActiveId(item.id);
                   mutation.mutate(item.id);
                 }}
-                className={`focus:ring-brand-500 relative w-full rounded-2xl border border-neutral-200 bg-white px-4 py-5 text-center shadow-sm transition-colors hover:bg-neutral-50 focus:ring-2 focus:outline-none ${
+                className={`cursor-pointer focus:ring-brand-500 relative w-full rounded-2xl border border-neutral-200 bg-white px-4 py-5 text-center shadow-sm transition-colors hover:bg-neutral-50 focus:ring-2 focus:outline-none ${
                   isActive ? 'opacity-60' : ''
                 }`}
               >
