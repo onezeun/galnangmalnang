@@ -2,53 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { LuChevronDown, LuFilter } from 'react-icons/lu';
+import { categoryOptions, optionLabels, regionOptions } from '@/config/options';
 import { PlaceCategoryType, PlaceRegionType } from '@/types/places';
 import { useFilterStore } from '@/stores/filterStore';
 
-const label = {
-  region: {
-    all: '전체',
-    nearby: '현재위치근처',
-    north: '제주시/북부',
-    south: '서귀포/남부',
-    east: '동부',
-    west: '서부',
-  },
-  category: { all: '전체', food: '음식점', cafe: '카페', sight: '관광지' },
-} as const;
-
-const regionOptions = [
-  { value: 'all', label: '전체' },
-  { value: 'nearby', label: '현재위치근처' },
-  { value: 'north', label: '제주시/북부' },
-  { value: 'south', label: '서귀포/남부' },
-  { value: 'east', label: '동부' },
-  { value: 'west', label: '서부' },
-];
-
-const categoryOptions = [
-  { value: 'all', label: '전체' },
-  { value: 'food', label: '음식점' },
-  { value: 'cafe', label: '카페' },
-  { value: 'sight', label: '관광지' },
-];
-
 export default function Filter() {
   const [open, setOpen] = useState(false);
+  const [locStatus, setLocStatus] = useState('');
 
-  const {
-    region,
-    category,
-    lat,
-    lng,
-    radius,
-    locStatus,
-    setRegion,
-    setCategory,
-    setLocation,
-    setRadius,
-    setLocStatus,
-  } = useFilterStore();
+  const { region, category, lat, lng, radius, setRegion, setCategory, setLocation, setRadius } =
+    useFilterStore();
 
   // nearby 선택 시 위치 요청
   useEffect(() => {
@@ -60,7 +23,7 @@ export default function Filter() {
     setLocStatus('getting');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setLocation(String(pos.coords.latitude), String(pos.coords.longitude));
+        setLocation(pos.coords.latitude, pos.coords.longitude);
         setLocStatus('ok');
       },
       (err) => {
@@ -74,13 +37,13 @@ export default function Filter() {
   // 선택 항목 UI 표시
   const summaryChips = useMemo(() => {
     const chips: string[] = [];
-    if (region !== 'all')
-      chips.push(`지역: ${label.region[region as keyof typeof label.region] ?? region}`);
-    if (category !== 'all')
-      chips.push(
-        `카테고리: ${label.category[category as keyof typeof label.category] ?? category}`
-      );
+
+    if (region !== 'all') chips.push(`지역: ${optionLabels.region[region] ?? region}`);
+
+    if (category !== 'all') chips.push(`카테고리: ${optionLabels.category[category] ?? category}`);
+
     if (region === 'nearby' && lat && lng) chips.push(`반경: ${Number(radius) / 1000}km`);
+
     return chips;
   }, [region, category, lat, lng, radius]);
 
@@ -137,7 +100,7 @@ export default function Filter() {
                   <select
                     className="rounded border border-neutral-300 px-2 py-1 text-xs"
                     value={radius}
-                    onChange={(e) => setRadius(e.target.value)}
+                    onChange={(e) => setRadius(Number(e.target.value))}
                   >
                     <option value="500">0.5km</option>
                     <option value="1000">1km</option>

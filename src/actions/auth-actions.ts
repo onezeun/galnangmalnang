@@ -1,6 +1,6 @@
 'use server';
 import { ActionResultType } from '@/types/action';
-import { ERR } from '@/config';
+import { ERR } from '@/config/errors';
 import { createServerSupabaseClient } from '@/utils/supabase/server';
 
 // 유저정보조회(로그인상태확인)

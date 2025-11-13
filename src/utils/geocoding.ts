@@ -1,7 +1,7 @@
 // 카카오 주소검색 API
 'use server';
 
-import { ERR } from '@/config';
+import { ERR } from '@/config/errors';
 import { KAKAO_API_KEY } from '@/config';
 
 export async function geocodeByAddress(address: string) {

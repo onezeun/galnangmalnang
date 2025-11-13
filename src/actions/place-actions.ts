@@ -1,10 +1,10 @@
 'use server';
 
+import { ERR } from '@/config/errors';
 import { ActionResultType } from '@/types/action';
 import * as PType from '@/types/places';
 import { geocodeByAddress } from '@/utils/geocoding';
 import { createServerSupabaseClient } from '@/utils/supabase/server';
-import { ERR } from '@/config';
 import type { Database } from '@/types_db';
 
 type PlacesInsert = Database['public']['Tables']['places']['Insert'];
@@ -40,7 +40,7 @@ async function requireAuth() {
 }
 
 /* 장소 단건 조회 */
-export async function getPlaceByIdAction(id: number): Promise<ActionResultType> {
+export async function getPlaceByIdAction(id: number): Promise<ActionResultType<PType.PlaceRowType>> {
   if (!Number.isFinite(id)) {
     return { ok: false, type: ERR.BAD_REQUEST.type, message: '잘못된 요청입니다.' };
   }
