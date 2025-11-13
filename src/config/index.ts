@@ -9,4 +9,3 @@ const SUPABASE = {
 const KAKAO_API_KEY = process.env.KAKAO_REST_API_KEY;
 
 export { SUPABASE, KAKAO_API_KEY };
-

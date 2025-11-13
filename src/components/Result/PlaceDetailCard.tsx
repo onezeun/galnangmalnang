@@ -3,9 +3,9 @@
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { LuShare2 } from 'react-icons/lu';
-import { getPlaceByIdAction } from '@/actions/place-actions';
 import { optionLabels } from '@/config/options';
 import { PlaceCategoryType } from '@/types/places';
+import { getPlaceByIdAction } from '@/actions/place-actions';
 
 type Props = { id: number };
 
@@ -16,7 +16,6 @@ export default function PlaceDetailCard({ id }: Props) {
     queryFn: async () => {
       const res = await getPlaceByIdAction(id);
       if (!res.ok) throw new Error('대상을 찾을 수 없습니다.');
-      console.log(res)
       return res.data;
     },
   });

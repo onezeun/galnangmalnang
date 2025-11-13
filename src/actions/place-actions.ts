@@ -40,7 +40,9 @@ async function requireAuth() {
 }
 
 /* 장소 단건 조회 */
-export async function getPlaceByIdAction(id: number): Promise<ActionResultType<PType.PlaceRowType>> {
+export async function getPlaceByIdAction(
+  id: number
+): Promise<ActionResultType<PType.PlaceRowType>> {
   if (!Number.isFinite(id)) {
     return { ok: false, type: ERR.BAD_REQUEST.type, message: '잘못된 요청입니다.' };
   }
