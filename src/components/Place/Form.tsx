@@ -97,11 +97,29 @@ export default function PlaceForm({ mode, id }: Props) {
       if (!res.ok) throw new Error(res.message ?? '요청 처리 중 오류가 발생했습니다.');
       return res;
     },
-    onSuccess: (_, __) => {
+    onSuccess: (res, _, __) => {
+      // 캐시 무효화
       qc.invalidateQueries({ queryKey: ['places'] });
       if (mode === 'edit' && typeof id === 'number') {
         qc.invalidateQueries({ queryKey: ['place', id] });
       }
+
+      // 토스트 메시지 처리
+      setToast({
+        ok: true,
+        msg: res.message ?? (mode === 'edit' ? '수정이 완료되었습니다.' : '등록이 완료되었습니다.'),
+      });
+
+      // create 모드면 폼 초기화
+      if (mode === 'create') {
+        const form = document.querySelector<HTMLFormElement>('form[data-place-form="true"]');
+        form?.reset();
+        setFile(null);
+        setPreview(null);
+      }
+    },
+    onError: (err: any) => {
+      setToast({ ok: false, msg: err?.message ?? '오류가 발생했습니다.' });
     },
   });
 
@@ -122,24 +140,7 @@ export default function PlaceForm({ mode, id }: Props) {
       fd.set('id', String(id));
     }
 
-    mutation.mutate(fd, {
-      onSuccess: (res: any) => {
-        setToast({
-          ok: true,
-          msg:
-            res.message ?? (mode === 'edit' ? '수정이 완료되었습니다.' : '등록이 완료되었습니다.'),
-        });
-
-        if (mode === 'create') {
-          form.reset();
-          setFile(null);
-          setPreview(null);
-        }
-      },
-      onError: (err: any) => {
-        setToast({ ok: false, msg: err?.message ?? '오류가 발생했습니다.' });
-      },
-    });
+    mutation.mutate(fd);
   }
 
   const submitting = mutation.isPending;
