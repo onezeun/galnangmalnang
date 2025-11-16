@@ -102,10 +102,10 @@ export default function Filter() {
                     value={radius}
                     onChange={(e) => setRadius(Number(e.target.value))}
                   >
-                    <option value="500">0.5km</option>
                     <option value="1000">1km</option>
-                    <option value="2000">2km</option>
                     <option value="3000">3km</option>
+                    <option value="5000">5km</option>
+                    <option value="10000">10km</option>
                   </select>
                 </div>
               )}

@@ -202,7 +202,7 @@ export default function PlaceForm({ mode, id }: Props) {
             required
             className="bg-white ring-brand-500 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
           >
-            {categoryOptions.map((c) => (
+            {categoryOptions.slice(1).map((c) => (
               <option key={c.value} value={c.value}>
                 {c.label}
               </option>
@@ -219,7 +219,7 @@ export default function PlaceForm({ mode, id }: Props) {
             required
             className="bg-white ring-brand-500 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2"
           >
-            {regionOptions.map((r) => (
+            {regionOptions.slice(2).map((r) => (
               <option key={r.value} value={r.value}>
                 {r.label}
               </option>
