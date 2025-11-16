@@ -36,7 +36,6 @@ export default function Header() {
   });
 
   const isLoggedIn = auth?.isLoggedIn ?? false;
-  const user = auth?.user ?? null;
 
   // 메뉴 아이템
   const items: Item[] = useMemo(() => {

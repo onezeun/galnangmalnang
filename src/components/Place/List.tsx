@@ -42,7 +42,6 @@ export default function PlaceList() {
     placeholderData: (prev) => prev,
   });
 
-  console.log(data);
   const rows = data?.rows ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
