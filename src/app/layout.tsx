@@ -14,11 +14,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
     <html lang="ko">
       <body className="font-pretendard antialiased">
-        <ReactQueryClientProvider >
+        <ReactQueryClientProvider>
           <div className="bg-brand-50 mx-auto max-w-[800px]">
             <Header />
             <main className="mx-4 min-h-[100dvh]">{children}</main>

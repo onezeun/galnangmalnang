@@ -63,5 +63,5 @@ export async function signOutAction() {
 
   await supabase.auth.signOut();
 
-  return { ok: true, data: { isLoggedIn: false, user: null, redirect: '/' } }
+  return { ok: true, data: { isLoggedIn: false, user: null, redirect: '/' } };
 }
