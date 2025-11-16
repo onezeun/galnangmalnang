@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import ReactQueryClientProvider from '@/config/ReactQueryClientProvider';
 import Footer from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
@@ -25,7 +26,7 @@ export default async function RootLayout({
     <html lang="ko">
       <head>
         {/* Kakao SDK */}
-        <script
+        <Script
           src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.8/kakao.min.js"
           integrity="sha384-WUSirVbD0ASvo37f3qQZuDap8wy76aJjmGyXKOYgPL/NdAs8HhgmPlk9dz2XQsNv"
           crossOrigin="anonymous"
