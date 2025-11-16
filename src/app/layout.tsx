@@ -2,7 +2,14 @@ import type { Metadata } from 'next';
 import ReactQueryClientProvider from '@/config/ReactQueryClientProvider';
 import Footer from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
+import { KAKAO_JS_API_KEY } from '@/config';
 import './globals.css';
+
+declare global {
+  interface Window {
+    Kakao: any;
+  }
+}
 
 export const metadata: Metadata = {
   title: '갈낭말낭',
@@ -16,6 +23,15 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      <head>
+        {/* Kakao SDK */}
+        <script
+          src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.8/kakao.min.js"
+          integrity="sha384-WUSirVbD0ASvo37f3qQZuDap8wy76aJjmGyXKOYgPL/NdAs8HhgmPlk9dz2XQsNv"
+          crossOrigin="anonymous"
+        />
+        <meta name="kakao-sdk-app-key" content={KAKAO_JS_API_KEY} />
+      </head>
       <body className="font-pretendard antialiased">
         <ReactQueryClientProvider>
           <div className="bg-brand-50 mx-auto max-w-[800px]">

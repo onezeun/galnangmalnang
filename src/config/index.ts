@@ -7,5 +7,6 @@ const SUPABASE = {
 };
 
 const KAKAO_API_KEY = process.env.KAKAO_REST_API_KEY;
+const KAKAO_JS_API_KEY = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
 
-export { SUPABASE, KAKAO_API_KEY };
+export { SUPABASE, KAKAO_API_KEY, KAKAO_JS_API_KEY };

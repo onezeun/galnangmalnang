@@ -4,10 +4,10 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { LuShare2 } from 'react-icons/lu';
 import { optionLabels } from '@/config/options';
 import { PlaceCategoryType } from '@/types/places';
 import { getPlaceByIdAction } from '@/actions/place-actions';
+import KakaoShareButton from './KakaoShareButton';
 
 type Props = { id: number };
 
@@ -99,27 +99,7 @@ export default function PlaceDetailCard({ id }: Props) {
         <div className="space-y-3 px-4 pb-4">
           <div className="flex items-start gap-2">
             <h3 className="text-brand-800 flex-1 text-base font-extrabold">{name}</h3>
-            <button
-              type="button"
-              className="text-neutral-500 hover:text-neutral-700"
-              onClick={() => {
-                if (navigator?.share) {
-                  navigator
-                    .share({
-                      title: name,
-                      url: typeof window !== 'undefined' ? window.location.href : '',
-                    })
-                    .catch(() => {});
-                } else if (typeof window !== 'undefined') {
-                  navigator.clipboard?.writeText(window.location.href);
-                  alert('링크가 복사되었습니다.');
-                }
-              }}
-              aria-label="공유"
-              title="공유"
-            >
-              <LuShare2 />
-            </button>
+            <KakaoShareButton name={name} description={description} image_url={image_url} />
           </div>
 
           {description && (
@@ -136,7 +116,7 @@ export default function PlaceDetailCard({ id }: Props) {
           {/* 지도 버튼 */}
           <button
             type="button"
-            className="bg-brand-500 hover:bg-brand-700 mt-2 w-full rounded-xl py-3 text-center text-sm font-semibold text-white"
+            className="cursor-pointer bg-brand-500 hover:bg-brand-700 mt-2 w-full rounded-xl py-3 text-center text-sm font-semibold text-white"
             onClick={() => {
               const q = name || address_line1;
               if (q) {
@@ -156,7 +136,7 @@ export default function PlaceDetailCard({ id }: Props) {
       <button
         type="button"
         onClick={() => router.push('/')}
-        className="mt-5 w-full rounded-xl border border-neutral-200 bg-white py-3 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
+        className="cursor-pointer mt-5 w-full rounded-xl border border-neutral-200 bg-white py-3 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
       >
         처음으로
       </button>
