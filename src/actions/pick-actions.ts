@@ -3,19 +3,23 @@
 import { ERR } from '@/config/errors';
 import { ActionResultType } from '@/types/action';
 import { PickPlacePayloadType } from '@/types/pick';
+import { PlaceRowType } from '@/types/places';
 import { createServerSupabaseClient } from '@/utils/supabase/server';
 
-// 필터 랜덤 뽑기
-export async function pickPlaceAction(payload: PickPlacePayloadType): Promise<ActionResultType> {
+/* 메인 필터 랜덤 뽑기 */
+export async function pickPlaceAction(
+  payload: PickPlacePayloadType
+): Promise<ActionResultType<PlaceRowType>> {
   const region = payload.region ?? '';
   const category = payload.category ?? '';
   const lat = payload.lat ?? null;
   const lng = payload.lng ?? null;
-  const radius = payload.radius ?? 2000; // 반경(m), 기본 2km
+  const radius = payload.radius ?? 2000;
 
   const supabase = await createServerSupabaseClient();
+
   try {
-    // 1) 현재위치 근처(nearby): 좌표가 있어야 동작
+    // 1) 현재 위치 근처
     if (region === 'nearby') {
       if (!lat || !lng) {
         return {
@@ -24,28 +28,29 @@ export async function pickPlaceAction(payload: PickPlacePayloadType): Promise<Ac
           message: '현재 위치 좌표가 필요합니다.',
         };
       }
+
       //  rpc
       //  Supabase의 PostgreSQL 함수(RPC, Remote Procedure Call)를 호출하여
       //  사용자의 현재 좌표(user_lat, user_lng) 주변에서
       //   지정 반경(radius_m) 내의 장소 중 하나를 랜덤으로 선택함.
       //  이 로직은 DB 내부에서 실행되므로 거리 계산 및 필터링이 빠르고 안전함.
+
+      // pick_one_nearby 랜덤 id 뽑기
       /* pick_one_nearby 함수
-        SELECT p.id, p.name,
-          ST_Distance(
-            ST_SetSRID(ST_MakePoint(p.lng, p.lat), 4326)::geography,
-            ST_SetSRID(ST_MakePoint(user_lng, user_lat), 4326)::geography
-          ) AS distance_m
-        FROM places AS p
-        WHERE
-          ST_DWithin(
-            ST_SetSRID(ST_MakePoint(p.lng, p.lat), 4326)::geography,
-            ST_SetSRID(ST_MakePoint(user_lng, user_lat), 4326)::geography,
-            radius_m
-          )
-          AND (p_category IS NULL OR p.category = p_category)
-        ORDER BY RANDOM()
-        LIMIT 1;
-    */
+        select p.id, p.name,
+              ST_Distance(
+                ST_SetSRID(ST_MakePoint(p.lng, p.lat), 4326)::geography,
+                ST_SetSRID(ST_MakePoint(user_lng, user_lat), 4326)::geography
+              ) as distance_m
+        from places p
+        where ST_DWithin(
+          ST_SetSRID(ST_MakePoint(p.lng, p.lat), 4326)::geography,
+          ST_SetSRID(ST_MakePoint(user_lng, user_lat), 4326)::geography,
+          radius_m
+        )
+        and (p_category is null or p.category = p_category)
+        order by random()
+        limit 1;    */
       const { data: nearbyData, error: nearbyError } = await supabase.rpc('pick_one_nearby', {
         user_lat: lat,
         user_lng: lng,
@@ -61,7 +66,9 @@ export async function pickPlaceAction(payload: PickPlacePayloadType): Promise<Ac
           details: nearbyError.message,
         };
       }
-      if (!nearbyData?.[0]?.id) {
+
+      const pickedId = nearbyData?.[0]?.id as number | undefined;
+      if (!pickedId) {
         return {
           ok: false,
           type: ERR.NOT_FOUND.type,
@@ -69,27 +76,58 @@ export async function pickPlaceAction(payload: PickPlacePayloadType): Promise<Ac
         };
       }
 
+      // id로 place 상세 조회
+      const { data: place, error: placeError } = await supabase
+        .from('places')
+        .select('*')
+        .eq('id', pickedId)
+        .maybeSingle<PlaceRowType>();
+
+      if (placeError || !place) {
+        return {
+          ok: false,
+          type: ERR.INTERNAL_SERVER_ERROR.type,
+          message: '선택된 장소 정보를 불러오지 못했습니다.',
+          details: placeError?.message,
+        };
+      }
+
       return {
         ok: true,
-        data: { id: nearbyData?.[0]?.id },
-        redirect: `/result/${nearbyData?.[0]?.id}`,
+        data: place,
+        redirect: `/result/${pickedId}`,
       };
     }
 
-    // 2) 그 외(전체/특정 지역): 기존 랜덤
+    // 2) 전체/특정 지역 랜덤
+    // pick_one_random 랜덤 id 뽑기
     // 필터 조건에 맞는 장소 리스트 함수 pick_one_random
     /*
-    SELECT id FROM places
-    WHERE
-      (region IS NULL OR places.region = region)
-      AND (category IS NULL OR places.category = category)
-    ORDER BY RANDOM() LIMIT 1;
+      SELECT p.id
+      FROM places AS p
+      WHERE
+        (
+          in_region IS NULL
+          OR in_region = ''
+          OR lower(in_region) = 'all'
+          OR lower(p.region) = lower(in_region)
+        )
+        AND
+        (
+          in_category IS NULL
+          OR in_category = ''
+          OR lower(in_category) = 'all'
+          OR lower(p.category) = lower(in_category)
+        )
+      ORDER BY random()
+      LIMIT 1;
     */
 
     const { data: randomData, error: randomError } = await supabase.rpc('pick_one_random', {
       in_region: region,
       in_category: category,
     });
+
     if (randomError) {
       return {
         ok: false,
@@ -98,7 +136,9 @@ export async function pickPlaceAction(payload: PickPlacePayloadType): Promise<Ac
         details: randomError.message,
       };
     }
-    if (!randomData?.[0]?.id) {
+
+    const pickedId = randomData?.[0]?.id as number | undefined;
+    if (!pickedId) {
       return {
         ok: false,
         type: ERR.NOT_FOUND.type,
@@ -106,10 +146,27 @@ export async function pickPlaceAction(payload: PickPlacePayloadType): Promise<Ac
         details: { region, category },
       };
     }
+
+    // id로 place 상세 조회
+    const { data: place, error: placeError } = await supabase
+      .from('places')
+      .select('*')
+      .eq('id', pickedId)
+      .maybeSingle<PlaceRowType>();
+
+    if (placeError || !place) {
+      return {
+        ok: false,
+        type: ERR.INTERNAL_SERVER_ERROR.type,
+        message: '선택된 장소 정보를 불러오지 못했습니다.',
+        details: placeError?.message,
+      };
+    }
+
     return {
       ok: true,
-      data: { id: randomData?.[0]?.id },
-      redirect: `/result/${randomData?.[0]?.id}`,
+      data: place,
+      redirect: `/result/${pickedId}`,
     };
   } catch (e: any) {
     return {
@@ -121,12 +178,14 @@ export async function pickPlaceAction(payload: PickPlacePayloadType): Promise<Ac
   }
 }
 
+/* 빠르게 뽑기 */
 export async function pickByCategoryAction(category: string) {
   const supabase = await createServerSupabaseClient();
 
+  // 1) 카테고리만 넣어서 랜덤 id 뽑기
   const { data, error } = await supabase.rpc('pick_one_random', {
     in_region: '', // 전체
-    in_category: category, // 'food' | 'cafe' | 'sight'
+    in_category: category,
   });
 
   if (error) {
@@ -137,7 +196,10 @@ export async function pickByCategoryAction(category: string) {
       details: error.message,
     };
   }
-  if (!data?.[0]?.id) {
+
+  const pickedId = data?.[0]?.id as number | undefined;
+
+  if (!pickedId) {
     return {
       ok: false,
       type: ERR.NOT_FOUND.type,
@@ -145,5 +207,25 @@ export async function pickByCategoryAction(category: string) {
       details: { category },
     };
   }
-  return { ok: true, data: { id: data?.[0]?.id }, redirect: `/result/${data?.[0]?.id}` };
+
+  // 2) id로 place 상세 조회
+  const { data: place, error: placeError } = await supabase
+    .from('places')
+    .select('*')
+    .eq('id', pickedId)
+    .maybeSingle();
+
+  if (placeError || !place) {
+    return {
+      ok: false,
+      type: ERR.INTERNAL_SERVER_ERROR.type,
+      message: '선택된 장소 정보를 불러오지 못했습니다.',
+      details: placeError?.message,
+    };
+  }
+
+  return {
+    ok: true,
+    data: place,
+  };
 }

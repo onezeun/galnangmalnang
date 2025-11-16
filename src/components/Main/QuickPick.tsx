@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { pickByCategoryAction } from '@/actions/pick-actions';
 
 const items = [
@@ -14,6 +14,7 @@ const items = [
 
 export default function QuickPick() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const mutation = useMutation({
@@ -23,27 +24,34 @@ export default function QuickPick() {
       return res;
     },
     onSuccess: (res) => {
-      router.push(res.redirect!);
+      const place = res.data;
+
+      if (place!.image_url && typeof window !== 'undefined') {
+        const img = new window.Image();
+        img.src = place!.image_url;
+      }
+
+      queryClient.setQueryData(['place', place!.id], place);
+      router.push(`/result/${place!.id}`);
     },
-    onSettled: () => {
-      // 성공/실패 상관없이 로딩 끝나면 선택 해제
+    onError: () => {
       setActiveId(null);
     },
   });
+
   return (
     <section className="font-mitme text-brand-900 rounded-2xl bg-[--color-brand-50]/50 p-3">
       <h2 className="px-1 pb-2 text-2xl">빠르게 뽑기</h2>
 
       <ul role="list" className="flex flex-col gap-3">
         {items.map((item) => {
-          const isActive = mutation.isPending && activeId === item.id;
+          const isActive = activeId === item.id;
           return (
             <li key={item.id} className="bg-white">
               <button
                 type="button"
                 disabled={mutation.isPending}
                 onClick={() => {
-                  // 이미 로딩 중이면 또 클릭 막기
                   if (mutation.isPending) return;
                   setActiveId(item.id);
                   mutation.mutate(item.id);
@@ -74,7 +82,7 @@ export default function QuickPick() {
 
       {mutation.error && (
         <p className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {mutation.error.message}
+          {mutation.error instanceof Error ? mutation.error.message : '오류가 발생했습니다.'}
         </p>
       )}
     </section>

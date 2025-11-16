@@ -1,6 +1,8 @@
 'use client';
 
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { LuShare2 } from 'react-icons/lu';
 import { optionLabels } from '@/config/options';
@@ -11,6 +13,8 @@ type Props = { id: number };
 
 export default function PlaceDetailCard({ id }: Props) {
   const router = useRouter();
+  const [imgLoaded, setImgLoaded] = useState(false);
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['place', id],
     queryFn: async () => {
@@ -69,13 +73,24 @@ export default function PlaceDetailCard({ id }: Props) {
         </div>
 
         {/* 이미지 영역 */}
-        <div className="mx-3 mb-3 h-1/2 rounded-lg bg-neutral-200/80 object-cover">
+        <div className="mx-3 mb-3 relative h-[300px] md:h-[500px] rounded-lg bg-neutral-200/80 overflow-hidden">
           {image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={image_url} alt={name} className="h-full w-full rounded-lg object-cover" />
+            <>
+              {!imgLoaded && <div className="absolute inset-0 animate-pulse bg-neutral-200" />}
+              <Image
+                src={image_url}
+                alt={name}
+                fill
+                sizes="(max-width: 768px) 100vw, 600px"
+                className={`rounded-lg object-cover transition-opacity duration-300 ${
+                  imgLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                onLoadingComplete={() => setImgLoaded(true)}
+              />
+            </>
           ) : (
             <div className="flex h-full items-center justify-center rounded-lg text-sm text-neutral-500">
-              이미지
+              이미지 없음
             </div>
           )}
         </div>
