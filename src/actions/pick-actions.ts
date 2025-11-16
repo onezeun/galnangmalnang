@@ -10,8 +10,8 @@ import { createServerSupabaseClient } from '@/utils/supabase/server';
 export async function pickPlaceAction(
   payload: PickPlacePayloadType
 ): Promise<ActionResultType<PlaceRowType>> {
-  const region = payload.region ?? '';
-  const category = payload.category ?? '';
+  const region = payload.region ?? 'all';
+  const category = payload.category ?? 'all';
   const lat = payload.lat ?? null;
   const lng = payload.lng ?? null;
   const radius = payload.radius ?? 2000;

@@ -42,7 +42,11 @@ export default function QuickPick() {
   return (
     <section className="font-mitme text-brand-900 rounded-2xl bg-[--color-brand-50]/50 p-3">
       <h2 className="px-1 pb-2 text-2xl">빠르게 뽑기</h2>
-
+      {mutation.error && (
+        <p className="font-pretendard my-3 font-bold rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {mutation.error instanceof Error ? mutation.error.message : '오류가 발생했습니다.'}
+        </p>
+      )}
       <ul role="list" className="flex flex-col gap-3">
         {items.map((item) => {
           const isActive = activeId === item.id;
@@ -79,12 +83,6 @@ export default function QuickPick() {
           );
         })}
       </ul>
-
-      {mutation.error && (
-        <p className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {mutation.error instanceof Error ? mutation.error.message : '오류가 발생했습니다.'}
-        </p>
-      )}
     </section>
   );
 }
