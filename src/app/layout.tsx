@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
-import { QueryClient, dehydrate } from '@tanstack/react-query';
 import ReactQueryClientProvider from '@/config/ReactQueryClientProvider';
-import { getAuthAction } from '@/actions/auth-actions';
 import Footer from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
 import './globals.css';
@@ -16,17 +14,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const qc = new QueryClient();
-  await qc.prefetchQuery({
-    queryKey: ['auth'],
-    queryFn: getAuthAction,
-  });
-  const dehydratedState = dehydrate(qc);
 
   return (
     <html lang="ko">
       <body className="font-pretendard antialiased">
-        <ReactQueryClientProvider dehydratedState={dehydratedState}>
+        <ReactQueryClientProvider >
           <div className="bg-brand-50 mx-auto max-w-[800px]">
             <Header />
             <main className="mx-4 min-h-[100dvh]">{children}</main>

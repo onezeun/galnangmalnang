@@ -9,6 +9,7 @@ import { getSupabase } from '@/utils/supabase/client';
 import { getAuthAction } from '@/actions/auth-actions';
 import Logo from '@/components/common/Logo';
 
+type AuthData = { isLoggedIn: boolean; user: { id: string; email: string | null } | null };
 type Item = { href: string; label: string; onClick?: () => void };
 
 export default function Header() {
@@ -18,12 +19,24 @@ export default function Header() {
   const supabase = useRef(getSupabase()).current;
   const qc = useQueryClient();
 
-  const { data } = useQuery({
+  const { data: auth } = useQuery<AuthData>({
     queryKey: ['auth'],
-    queryFn: getAuthAction,
+    queryFn: async () => {
+      const res = await getAuthAction();
+
+      if (!res.ok) {
+        return {
+          isLoggedIn: false,
+          user: null,
+        };
+      }
+
+      return res.data as AuthData;
+    },
   });
 
-  const isLoggedIn = data?.ok ?? false;
+  const isLoggedIn = auth?.isLoggedIn ?? false;
+  const user = auth?.user ?? null;
 
   // 메뉴 아이템
   const items: Item[] = useMemo(() => {

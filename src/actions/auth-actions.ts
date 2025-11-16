@@ -56,3 +56,12 @@ export async function signInAction(formData: FormData): Promise<ActionResultType
     };
   }
 }
+
+// 로그아웃
+export async function signOutAction() {
+  const supabase = await createServerSupabaseClient();
+
+  await supabase.auth.signOut();
+
+  return { ok: true, data: { isLoggedIn: false, user: null, redirect: '/' } }
+}

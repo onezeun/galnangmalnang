@@ -2,12 +2,13 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { signInAction } from '@/actions/auth-actions';
 
 export default function LoginPage() {
   const router = useRouter();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const qc = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -19,6 +20,9 @@ export default function LoginPage() {
         setErrorMsg(res.message);
         return;
       }
+      // 로그인 성공 → auth 쿼리 무효화
+      qc.invalidateQueries({ queryKey: ['auth'] });
+
       if (res.redirect) {
         router.replace(res.redirect);
       }
