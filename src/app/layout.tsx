@@ -15,6 +15,22 @@ declare global {
 export const metadata: Metadata = {
   title: '갈낭말낭',
   description: '갈까 말까의 제주도 방언으로 제주도 여행지 랜덤 뽑기 사이트',
+  openGraph: {
+    title: '갈낭말낭🍊',
+    description: '갈까 말까의 제주도 방언으로 제주도 여행지 랜덤 뽑기 사이트',
+    url: 'https://galnangmalnang.vercel.app/',
+    siteName: '갈낭말낭',
+    images: [
+      {
+        url: '/logo.svg',
+        width: 1200,
+        height: 630,
+        alt: '갈낭말낭 로고 이미지',
+      },
+    ],
+    locale: 'ko_KR',
+    type: 'website',
+  },
 };
 
 export default async function RootLayout({
